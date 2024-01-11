@@ -7,7 +7,7 @@
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.2.1</version>
 	</parent>
-	<groupId>dev.gifflet</groupId>
+	<groupId>dev.gifflet.springcloudmicroservices</groupId>
 	<artifactId>clients</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>clients</name>
