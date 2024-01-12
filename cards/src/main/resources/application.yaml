@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: cards
+
+server:
+  port: 0
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
+    registerWithEureka: true
+    fetchRegistry: true
+  instance:
+    instanceId: ${spring.application.name}:${spring.application.instance_id:${random.uuid}}
