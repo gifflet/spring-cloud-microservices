@@ -5,7 +5,10 @@ import dev.gifflet.springcloudmicroservices.creditassessments.client.ClientResou
 import dev.gifflet.springcloudmicroservices.creditassessments.dto.CardDto;
 import dev.gifflet.springcloudmicroservices.creditassessments.dto.CustomerDto;
 import dev.gifflet.springcloudmicroservices.creditassessments.dto.CustomerCardsDto;
+import dev.gifflet.springcloudmicroservices.creditassessments.exception.ClientNotFoundException;
+import dev.gifflet.springcloudmicroservices.creditassessments.exception.CommunicationErrorException;
 import dev.gifflet.springcloudmicroservices.creditassessments.service.CreditAssessmentService;
+import feign.FeignException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -26,11 +29,18 @@ public class CreditAssessmentServiceImpl implements CreditAssessmentService {
 
     @Override
     public CustomerCardsDto getCustomerCards(String cpf) {
-        ResponseEntity<CustomerDto> clientResponse = getClientResourceClient().findByCpf(cpf);
-        ResponseEntity<List<CardDto>> cardsResponse = getCardResourceClient().findByCpf(cpf);
-        return CustomerCardsDto.builder()
-                .customer(clientResponse.getBody())
-                .cards(cardsResponse.getBody())
-                .build();
+        try {
+            ResponseEntity<CustomerDto> clientResponse = getClientResourceClient().findByCpf(cpf);
+            ResponseEntity<List<CardDto>> cardsResponse = getCardResourceClient().findByCpf(cpf);
+            return CustomerCardsDto.builder()
+                    .customer(clientResponse.getBody())
+                    .cards(cardsResponse.getBody())
+                    .build();
+        } catch (FeignException.FeignClientException e) {
+            if(e.status() == 404) {
+                throw new ClientNotFoundException();
+            }
+            throw new CommunicationErrorException(e.status(), e.getMessage());
+        }
     }
 }
