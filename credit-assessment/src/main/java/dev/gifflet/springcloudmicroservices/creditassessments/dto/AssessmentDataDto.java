@@ -3,11 +3,9 @@ package dev.gifflet.springcloudmicroservices.creditassessments.dto;
 import lombok.Data;
 
 @Data
-public class CustomerDto {
-
-    private String id;
+public class AssessmentDataDto {
 
     private String cpf;
 
-    private Integer age;
+    private Long income;
 }

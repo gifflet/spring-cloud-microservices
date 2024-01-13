@@ -1,5 +1,6 @@
 package dev.gifflet.springcloudmicroservices.creditassessments.client;
 
+import dev.gifflet.springcloudmicroservices.creditassessments.dto.ApprovedCardDto;
 import dev.gifflet.springcloudmicroservices.creditassessments.dto.CardDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -13,4 +14,7 @@ public interface CardResourceClient {
 
     @GetMapping(params = "cpf")
     ResponseEntity<List<CardDto>> findByCpf(@RequestParam String cpf);
+
+    @GetMapping(params = "income")
+    public ResponseEntity<List<CardDto>> getCardsWithIncomeLowerThan(@RequestParam("income") long income);
 }
