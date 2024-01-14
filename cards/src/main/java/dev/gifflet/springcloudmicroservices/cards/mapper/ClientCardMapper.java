@@ -11,6 +11,6 @@ public interface ClientCardMapper {
 
     @Mapping(target = "name", source = "clientCard.card.name")
     @Mapping(target = "brand", source = "clientCard.card.brand")
-    @Mapping(target = "creditLimit", source = "clientCard.card.creditLimit")
+    @Mapping(target = "creditLimit", source = "clientCard.creditLimit")
     ClientCardResponse toResponse(ClientCard clientCard);
 }

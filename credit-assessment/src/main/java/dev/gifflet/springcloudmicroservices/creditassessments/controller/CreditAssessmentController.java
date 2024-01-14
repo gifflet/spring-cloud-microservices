@@ -1,8 +1,6 @@
 package dev.gifflet.springcloudmicroservices.creditassessments.controller;
 
-import dev.gifflet.springcloudmicroservices.creditassessments.dto.AssessmentDataDto;
-import dev.gifflet.springcloudmicroservices.creditassessments.dto.CustomerCardsDto;
-import dev.gifflet.springcloudmicroservices.creditassessments.dto.CustomerEvaluationResponseDto;
+import dev.gifflet.springcloudmicroservices.creditassessments.dto.*;
 import dev.gifflet.springcloudmicroservices.creditassessments.service.CreditAssessmentService;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -38,5 +36,10 @@ public class CreditAssessmentController {
     @PostMapping
     public ResponseEntity<CustomerEvaluationResponseDto> assessCustomerCredit(@RequestBody AssessmentDataDto assessmentData) {
         return ResponseEntity.ok().body(getCreditAssessmentService().assessCustomerCredit(assessmentData.getCpf(), assessmentData.getIncome()));
+    }
+
+    @PostMapping("/request-card")
+    public ResponseEntity<CardRequestProtocolDto> requestClientCard(@RequestBody CardIssuanceRequestDataDto requestData) {
+        return ResponseEntity.ok(getCreditAssessmentService().requestCardIssuance(requestData));
     }
 }

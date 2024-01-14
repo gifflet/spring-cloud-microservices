@@ -3,8 +3,10 @@ package dev.gifflet.springcloudmicroservices.creditassessments.service.impl;
 import dev.gifflet.springcloudmicroservices.creditassessments.client.CardResourceClient;
 import dev.gifflet.springcloudmicroservices.creditassessments.client.ClientResourceClient;
 import dev.gifflet.springcloudmicroservices.creditassessments.dto.*;
+import dev.gifflet.springcloudmicroservices.creditassessments.exception.CardIssuanceException;
 import dev.gifflet.springcloudmicroservices.creditassessments.exception.ClientNotFoundException;
 import dev.gifflet.springcloudmicroservices.creditassessments.exception.CommunicationErrorException;
+import dev.gifflet.springcloudmicroservices.creditassessments.mqueue.CardIssuanceRequestPublisher;
 import dev.gifflet.springcloudmicroservices.creditassessments.service.CreditAssessmentService;
 import feign.FeignException;
 import lombok.AccessLevel;
@@ -15,7 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +28,9 @@ public class CreditAssessmentServiceImpl implements CreditAssessmentService {
 
     @Getter(AccessLevel.PRIVATE)
     private final CardResourceClient cardResourceClient;
+
+    @Getter(AccessLevel.PRIVATE)
+    private final CardIssuanceRequestPublisher cardIssuanceRequestPublisher;
 
     @Override
     public CustomerCardsDto getCustomerCards(String cpf) {
@@ -74,5 +79,15 @@ public class CreditAssessmentServiceImpl implements CreditAssessmentService {
                 .brand(cardDto.getBrand())
                 .creditLimit(approvedCreditLimit)
                 .build();
+    }
+
+    @Override
+    public CardRequestProtocolDto requestCardIssuance(CardIssuanceRequestDataDto cardIssuanceRequest) {
+        try {
+            cardIssuanceRequestPublisher.requestCard(cardIssuanceRequest);
+            return new CardRequestProtocolDto(UUID.randomUUID().toString());
+        } catch (Exception e) {
+            throw new CardIssuanceException(e.getMessage());
+        }
     }
 }
