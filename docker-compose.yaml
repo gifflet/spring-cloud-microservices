@@ -18,5 +18,20 @@ services:
       - rabbitmq:/var/lib/rabbitmq
     restart: always
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0.4
+    container_name: keycloak
+    hostname: keycloak
+    ports:
+      - "8081:8080"
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    volumes:
+      - keycloak:/opt/keycloak/data
+    command: "start-dev"
+    restart: always
+
 volumes:
   rabbitmq:
+  keycloak:
