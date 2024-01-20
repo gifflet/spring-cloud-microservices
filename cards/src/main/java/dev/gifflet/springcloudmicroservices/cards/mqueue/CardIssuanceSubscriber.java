@@ -11,12 +11,14 @@ import dev.gifflet.springcloudmicroservices.cards.repository.ClientCardRepositor
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class CardIssuanceSubscriber {
 
     @Getter(AccessLevel.PRIVATE)
@@ -38,7 +40,7 @@ public class CardIssuanceSubscriber {
                     .creditLimit(cardIssuanceRequest.getCreditLimit())
                     .build());
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            log.error("Error processing card issuance event: {}", e.getMessage());
         }
     }
 }
