@@ -5,10 +5,8 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
-    hostname: habbitmq
+    hostname: rabbitmq
     ports:
-      - "5671:5671"
-      - "5672:5672"
       - "15672:15672"
     environment:
       - RABBITMQ_DEFAULT_USER=admin
@@ -16,22 +14,113 @@ services:
       - TZ=America/Sao_Paulo
     volumes:
       - rabbitmq:/var/lib/rabbitmq
+    networks:
+      - network
     restart: always
+    depends_on:
+      - eureka
 
   keycloak:
     image: quay.io/keycloak/keycloak:23.0.4
     container_name: keycloak
     hostname: keycloak
-    ports:
-      - "8081:8080"
     environment:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
+    ports:
+      - "8081:8080"
     volumes:
       - keycloak:/opt/keycloak/data
     command: "start-dev"
+    networks:
+      - network
     restart: always
+    depends_on:
+      - eureka
+
+  eureka:
+    build: ./eurekaserver
+    image: gifflet/spring-cloud-microservices-eureka
+    container_name: eureka
+    environment:
+      - APPLICATION_PORT=8761
+      - EUREKA_SERVICE_URL=http://eureka:8761/eureka
+    ports:
+      - "8761:8761"
+    networks:
+      - network
+    restart: always
+  
+  clients:
+    build: clients
+    image: gifflet/spring-cloud-microservices-clients
+    container_name: clients
+    environment:
+      - APPLICATION_PORT=8080
+      - EUREKA_SERVICE_URL=http://eureka:8761/eureka
+    networks:
+      - network
+    restart: always
+    depends_on:
+      - eureka
+
+  cards:
+    build: cards
+    image: gifflet/spring-cloud-microservices-cards
+    container_name: cards
+    environment:
+      - APPLICATION_PORT=8080
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=admin
+      - RABBITMQ_PASSWORD=admin
+    networks:
+      - network
+    restart: always
+    depends_on:
+      - eureka
+  
+  cloudgateway:
+    build: cloudgateway
+    image: gifflet/spring-cloud-microservices-cloudgateway
+    container_name: cloudgateway
+    environment:
+      - APPLICATION_PORT=8080
+      - EUREKA_SERVICE_URL=http://eureka:8761/eureka
+      - KEYCLOAK_ISSUER_URL=http://keycloak:8080/realms/spring-cloud-microservices
+    ports:
+      - "8080:8080"
+    networks:
+      - network
+    restart: always
+    depends_on:
+      - eureka
+      - keycloak
+      - clients
+      - cards
+      - rabbitmq
+      - credit-assessment
+
+  credit-assessment:
+    build: credit-assessment
+    image: gifflet/spring-cloud-microservices-credit-assessment
+    container_name: credit-assessment
+    environment:
+      - APPLICATION_PORT=8080
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=admin
+      - RABBITMQ_PASSWORD=admin
+      - EUREKA_SERVICE_URL=http://eureka:8761/eureka
+    networks:
+      - network
+    restart: always
+    depends_on:
+      - eureka
 
 volumes:
   rabbitmq:
   keycloak:
+
+networks:
+  network:
